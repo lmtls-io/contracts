@@ -409,6 +409,16 @@ contract LIX is ERC20, ERC20Burnable, ERC20Lockable, Pausable {
         return super.transfer(to, amount);
     }
 
+    // To transfer tokens to the provided list of address with respective amount
+    function batchTransfer(address[] calldata toAddresses, uint256[] calldata amounts) public 
+    {
+        require(toAddresses.length == amounts.length, "Invalid input parameters");
+
+        for(uint256 indx = 0; indx < toAddresses.length; indx++) {
+            require(transfer(toAddresses[indx], amounts[indx]), "Unable to transfer token to the account");
+        }
+    }
+
     function transferFrom(address from, address to, uint256 amount) public checkLock(from, amount) whenNotPaused() override returns (bool) {
         return super.transferFrom(from, to, amount);
     }
