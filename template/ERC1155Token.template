@@ -1,0 +1,60 @@
+pragma solidity ^0.8.4;
+
+import "../openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "../openzeppelin/contracts/access/Ownable.sol";
+import "../openzeppelin/contracts/utils/Strings.sol";
+import "../openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol";
+import "../openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
+
+contract {ContractName} is ERC1155, Ownable, ERC1155Burnable, ERC1155URIStorage {
+    string constant NAME = "{Name}";
+    string constant SYMBOL = "{Symbol}";
+
+    constructor() ERC1155("") {}
+
+    function setURI(uint256 tokenId, string memory newuri) public onlyOwner {
+        _setURI(tokenId, newuri);
+    }
+
+    function mint(address account, uint256 id, uint256 amount)
+        public
+        onlyOwner
+    {
+        _mint(account, id, amount, "");
+    }
+
+    function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts)
+        public
+        onlyOwner
+    {
+        require(ids.length == amounts.length, "ERC1155: ids and amounts length mismatch");
+        _mintBatch(to, ids, amounts, "");
+    }
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 amount
+    ) external {
+        _safeTransferFrom(from, to, id, amount, "");
+    }
+
+    function transferFromBatch(
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts
+    ) external {
+        require(ids.length == amounts.length, "ERC1155: ids and amounts length mismatch");
+        _safeBatchTransferFrom(from, to, ids, amounts, "");
+    }
+
+    function name() external pure returns (string memory) {
+        return NAME;
+    }
+
+    function symbol() external pure returns (string memory) {
+        return SYMBOL;
+    }
+}

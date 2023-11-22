@@ -1,0 +1,42 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.0;
+
+import "../baselib/SafeMath.sol";
+import "../openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "../openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "../openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
+import "../openzeppelin/contracts/access/Ownable.sol";
+import "../openzeppelin/contracts/utils/Strings.sol";
+
+contract {ContractName} is
+    ERC721Holder,
+    ERC721URIStorage,
+    Ownable
+{
+    using SafeMath for uint256;
+    string constant NAME = "{Name}";
+    string constant SYMBOL = "{Symbol}";
+    uint256 constant MAX_TOTAL_SUPPLY = {maxTotalSupply};
+    uint256 public currentID = 1;
+
+    constructor() ERC721(NAME,SYMBOL) {
+    }
+
+    function maxTotalSupply() public pure returns (uint256)
+    {
+        return MAX_TOTAL_SUPPLY;
+    }
+
+    function mint(string memory tokenURI) external onlyOwner {
+        uint256 range = 1 + currentID;
+        require(range <= MAX_TOTAL_SUPPLY, "Sorry, Request More than TotalSupply");
+        _safeMint(msg.sender, currentID);
+        _setTokenURI(currentID, tokenURI);
+        currentID++;
+    }
+
+    function transfer(address to, uint256 tokenId) external {
+        safeTransferFrom(_msgSender(), to, tokenId, "");
+    }
+}

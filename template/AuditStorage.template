@@ -1,0 +1,118 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.4;
+
+abstract contract Context {
+    function _msgSender() internal view virtual returns (address) {
+
+        return msg.sender;
+    }
+
+    function _msgData() internal view virtual returns (bytes calldata) {
+        this;
+        // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
+        return msg.data;
+    }
+}
+
+abstract contract Ownable is Context {
+    address private _owner;
+
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    constructor() {
+        address msgSender = _msgSender();
+        _owner = msgSender;
+        emit OwnershipTransferred(address(0), msgSender);
+    }
+
+    function owner() public view virtual returns (address) {
+        return _owner;
+    }
+
+    modifier onlyOwner() {
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        _;
+    }
+
+    function renounceOwnership() public virtual onlyOwner {
+        emit OwnershipTransferred(_owner, address(0));
+        _owner = address(0);
+    }
+
+    function transferOwnership(address newOwner) public virtual onlyOwner {
+        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        emit OwnershipTransferred(_owner, newOwner);
+        _owner = newOwner;
+    }
+}
+
+interface IAuditStorage {
+    function query(uint256 auditId) external view returns (string memory);
+    function insert(uint256 auditId, string memory _auditData) external returns (bool);
+    function update(uint256 auditId, string memory _auditData) external returns (bool);
+    function remove(uint256 auditId) external returns (bool);
+
+    event Insert(address indexed owner, uint256 indexed auditId, string _auditData);
+    event Update(address indexed owner, uint256 indexed auditId, string _auditData);
+    event Remove(address indexed owner, uint256 indexed auditId);
+}
+
+interface IAuditStorageMetadata is IAuditStorage {
+    function name() external view returns (string memory);
+}
+
+contract AuditStorage is Context, Ownable, IAuditStorage, IAuditStorageMetadata {
+    mapping(uint256 => string) private _audit;
+
+    string private _name;
+    uint256 public constant AUDIT_STORAGE_VERSION = 1;
+
+    constructor(string memory name_) {
+        _name = name_;
+    }
+
+    function name() public view virtual override returns (string memory) {
+        return _name;
+    }
+
+    function insert(uint256 auditId, string memory _auditData) public onlyOwner virtual override returns (bool) {
+        string memory _auditTmp = _audit[auditId];
+        require(bytes(_auditTmp).length == 0, "Audit Data already exists");
+
+        _audit[auditId] = _auditData;
+
+        emit Insert(msg.sender, auditId, _auditData);
+        return true;
+    }
+
+    function update(uint256 auditId, string memory _auditData) public onlyOwner virtual override returns (bool) {
+        require(bytes(_audit[auditId]).length != 0, "Audit Data does not exists");
+
+        _audit[auditId] = _auditData;
+
+        emit Update(msg.sender, auditId, _auditData);
+        return true;
+    }
+
+    function remove(uint256 auditId) public onlyOwner virtual override returns (bool) {
+        if (bytes(_audit[auditId]).length != 0) {
+            delete _audit[auditId];
+        }
+
+        emit Remove(msg.sender, auditId);
+        return true;
+    }
+
+    function query(uint256 auditId) public view virtual override returns (string memory) {
+        string memory _auditData = _audit[auditId];
+
+        return _auditData;
+    }
+
+}
+
+contract {ContractName} is AuditStorage {
+
+    constructor() AuditStorage("{Name}") {
+    }
+}
