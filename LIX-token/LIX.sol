@@ -15,7 +15,8 @@ abstract contract Context {
 
 abstract contract Ownable is Context {
     address private _owner;
-
+    address public pendingOwner;
+    
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     constructor() {
@@ -33,15 +34,23 @@ abstract contract Ownable is Context {
         _;
     }
 
-    function renounceOwnership() public virtual onlyOwner {
-        emit OwnershipTransferred(_owner, address(0));
+    function renounceOwnership() public onlyOwner {
         _owner = address(0);
+        pendingOwner = address(0);
+        emit OwnershipTransferred(_owner, address(0));
     }
 
-    function transferOwnership(address newOwner) public virtual onlyOwner {
-        require(newOwner != address(0), "Ownable: new owner is the zero address");
-        emit OwnershipTransferred(_owner, newOwner);
-        _owner = newOwner;
+    function transferOwnership(address newOwner) public onlyOwner {
+        require(address(0) != newOwner, "pendingOwner set to the zero address.");
+        pendingOwner = newOwner;
+    }
+
+    function claimOwnership() public {
+        require(msg.sender == pendingOwner, "caller != pending owner");
+
+        _owner = pendingOwner;
+        pendingOwner = address(0);
+        emit OwnershipTransferred(_owner, pendingOwner);
     }
 }
 
@@ -402,7 +411,6 @@ contract Pausable is Ownable {
 contract LIX is ERC20, ERC20Burnable, ERC20Lockable, Pausable {
 
     constructor() ERC20("LIX", "LIX") {
-        _mint(msg.sender, 10000000000 * (10 ** decimals()));
     }
 
     function transfer(address to, uint256 amount) public checkLock(msg.sender, amount) whenNotPaused() override returns (bool) {
