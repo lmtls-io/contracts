@@ -431,6 +431,10 @@ contract LIX is ERC20, ERC20Burnable, ERC20Lockable, Pausable {
         return super.transferFrom(from, to, amount);
     }
 
+    function mint(address account, uint256 amount) public onlyOwner {
+        _mint(account, amount);
+    }
+    
     function burn(uint256 amount) public checkLock(msg.sender, amount) whenNotPaused() override {
         return super.burn(amount);
     }
