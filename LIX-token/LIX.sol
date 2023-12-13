@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.20;
+pragma solidity 0.8.18;
 
 abstract contract Context {
     function _msgSender() internal view virtual returns (address) {
@@ -453,7 +453,7 @@ contract Pausable is Ownable {
 }
 
 abstract contract ERC20Capped is ERC20 {
-    uint256 private immutable _cap;
+    uint256 private _cap;
 
     /**
      * @dev Total supply cap has been exceeded.
@@ -466,8 +466,7 @@ abstract contract ERC20Capped is ERC20 {
     error ERC20InvalidCap(uint256 cap);
 
     /**
-     * @dev Sets the value of the `cap`. This value is immutable, it can only be
-     * set once during construction.
+     * @dev Sets the value of the `cap`.
      */
     constructor(uint256 cap_) {
         if (cap_ == 0) {
@@ -494,6 +493,12 @@ abstract contract ERC20Capped is ERC20 {
             uint256 supply = totalSupply();
             if (supply > maxSupply) {
                 revert ERC20ExceededCap(supply, maxSupply);
+            }
+        }
+        if (to == address(0)) {
+            unchecked {
+            // Overflow not possible: value <= totalSupply or value <= fromBalance <= totalSupply.
+                _cap -= value;
             }
         }
     }
