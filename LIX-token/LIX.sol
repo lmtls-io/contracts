@@ -543,7 +543,7 @@ contract LIX is ERC20, ERC20Burnable, ERC20Lockable, Pausable, ERC20Capped {
         balance = super.balanceOf(holder);
     }
 
-    function getAvailableBalance(address holder) public view override returns (uint256 balance) {
+    function getAvailableBalance(address holder) public view returns (uint256 balance) {
         uint256 totalBalance = super.balanceOf(holder);
         uint256 availableBalance = 0;
         (uint256 lockedBalance, uint256 lockedLength) = totalLocked(holder);
@@ -562,12 +562,8 @@ contract LIX is ERC20, ERC20Burnable, ERC20Lockable, Pausable, ERC20Capped {
     }
 
     function getLockAmount(address holder) public view returns (uint256 balance) {
-        (uint256 lockedBalance, uint256 lockedLength) = totalLocked(holder);
+        (uint256 lockedBalance, ) = totalLocked(holder);
         balance = lockedBalance;
-    }
-
-    function balanceOfTotal(address holder) public view returns (uint256 balance) {
-        balance = super.balanceOf(holder);
     }
 
     function _update(address from, address to, uint256 value) internal override(ERC20, ERC20Capped)
